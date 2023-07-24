@@ -3,9 +3,9 @@
 /* Created on:     19/07/2023 17:48:21                          */
 /*==============================================================*/
 
-CREATE DATABASE GITHUB 
+CREATE DATABASE GITHUB_DATA
 GO 
-USE GITHUB
+USE GITHUB_DATA
 go 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
@@ -156,9 +156,9 @@ go
 /* Table: Contribution                                          */
 /*==============================================================*/
 create table Contribution (
-   idContrubutor        int                  not null,
-   idRepo               bigint               not null,
-   number_Contributions     int        null,
+   idContrubutor        int ,
+   idRepo               bigint  ,
+   number_Contributions     int   ,
    constraint PK_CONTRIBUTION primary key (idContrubutor, idRepo)
 )
 
@@ -185,21 +185,19 @@ go
 /*==============================================================*/
 create table Contributor (
    idContrubutor        int           identity(1,1)       not null,
-   contrubtor           int                  null,
+   contrubtor           varchar(max)                  null,
    constraint PK_CONTRIBUTOR primary key nonclustered (idContrubutor),
    constraint AK_IDENTIFIER_1_CONTRIBU unique (idContrubutor),
    constraint AK_IDENTIFIER_2_CONTRIBU unique (idContrubutor)
 )
-ALTER TABLE Contributor
-ALTER COLUMN contrubtor varchar(max);
-go
+
 
 /*==============================================================*/
 /* Table: Language                                              */
 /*==============================================================*/
 create table Language (
    idLanguage           int          identity(1,1)           not null,
-   language             varchar(100)         null,
+   language             varchar(max)         null,
    constraint PK_LANGUAGE primary key nonclustered (idLanguage)
 )
 go
@@ -208,8 +206,8 @@ go
 /* Table: Repo_Topic                                            */
 /*==============================================================*/
 create table Repo_Topic (
-   idTopic              int          identity(1,1)           not null,
-   idRepo               bigint               not null,
+   idTopic              int,
+   idRepo               bigint,
    constraint PK_REPO_TOPIC primary key (idTopic, idRepo)
 )
 go
@@ -234,15 +232,15 @@ go
 /* Table: Repository                                            */
 /*==============================================================*/
 create table Repository (
-   idRepo               bigint               not null,
+   idRepo               bigint       identity(1,1)    not null,
    idTypeOwner          int                  null,
    idLanguage           int                  not null,
-   fullName             int                  null,
+   fullName             varchar(max)                  null,
    createdAt            datetime             null,
    startCount           int                  null,
    description          text                 null,
    htmlUrl              text                 null,
-   contributorsUrl      int                  null,
+   contributorsUrl      text                  null,
    openIssuesCount_     int                  null,
    forks                int                  null,
    constraint PK_REPOSITORY primary key nonclustered (idRepo),
@@ -253,10 +251,6 @@ create table Repository (
    constraint AK_IDENTIFIER_5_REPOSITO unique (idRepo)
 )
 go
-ALTER TABLE Repository
-ALTER COLUMN fullName varchar(max);
-ALTER TABLE Repository
-ALTER COLUMN contributorsUrl VARCHAR(1000);
 
 /*==============================================================*/
 /* Index: ASSOCIATION5_FK                                       */
@@ -325,52 +319,13 @@ alter table Repository
    add constraint FK_REPOSITO_ASSOCIATI_TYPEOWNE foreign key (idTypeOwner)
       references TypeOwner (idTypeOwner)
 go
-
-use GITHUB
-SELECT * from Language 
-go
-select * from Language
+/*
+select * from Contribution
+select * from Repo_Topic
+*/
+select * from Contributor
 select * from TypeOwner
-select * from Repository 
-select * from Contributor 
-delete from Contributor
-DBCC CHECKIDENT (Contributor, RESEED, 1)
+SELECT * from Language 
+select * from Repository
 select * from Topic
-select * from Contribution 
 
-
--- Drop the foreign key constraints first
-ALTER TABLE Contribution
-   DROP CONSTRAINT FK_CONTRIBU_ASSOCIATI_CONTRIBU;
-   
-ALTER TABLE Contribution
-   DROP CONSTRAINT FK_CONTRIBU_ASSOCIATI_REPOSITO;
-
--- Drop the table if it exists
-IF OBJECT_ID('Contribution', 'U') IS NOT NULL
-   DROP TABLE Contribution;
-
-GO -- Separate batches
-
--- Recreate the table
-CREATE TABLE Contribution (
-   idContrubutor INT NOT NULL,
-   idRepo BIGINT NOT NULL,
-   number_Contributions INT NULL,
-   CONSTRAINT PK_CONTRIBUTION PRIMARY KEY (idContrubutor, idRepo)
-);
-
-GO -- Separate batches
-
--- Add the foreign key constraints back
-ALTER TABLE Contribution
-   ADD CONSTRAINT FK_CONTRIBU_ASSOCIATI_CONTRIBU FOREIGN KEY (idContrubutor)
-      REFERENCES Contributor (idContrubutor);
-
-GO -- Separate batches
-
-ALTER TABLE Contribution
-   ADD CONSTRAINT FK_CONTRIBU_ASSOCIATI_REPOSITO FOREIGN KEY (idRepo)
-      REFERENCES Repository (idRepo);
-
-GO -- Separate batches
